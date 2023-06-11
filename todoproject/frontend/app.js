@@ -65,3 +65,89 @@ window.addEventListener('load', () => {
         });
     });        
 });
+
+// document.addEventListener('DOMContentLoaded', () => {
+//     // Fetch JSON data from the server
+//     fetch('../server/src/api/data.json')
+//         .then(response => response.json())
+//         .then(jsonData => {
+//             // Get the tasks container
+//             const tasksContainer = document.getElementById('tasks');
+
+//             // Loop through the JSON data and create HTML elements
+//             jsonData.forEach(task => {
+//                 // Create a task element
+//                 const taskElement = document.createElement('div');
+//                 taskElement.textContent = task.name;
+
+//                 // Append the task element to the tasks container
+//                 tasksContainer.appendChild(taskElement);
+//             });
+//         })
+//         .catch(err => console.error(err));
+// });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Fetch JSON data from the server
+    fetch('../server/src/api/data.json') 
+      .then(response => response.json())
+      .then(jsonData => {
+        // Get the tasks container
+        const tasksContainer = document.getElementById('tasks');
+  
+        // Loop through the JSON data and create HTML elements
+        jsonData.items.forEach(task => {
+          // Create a task element
+          const taskElement = document.createElement('div');
+          taskElement.classList.add('task');
+  
+          const taskContentElement = document.createElement('div');
+          taskContentElement.classList.add('content');
+  
+          taskElement.appendChild(taskContentElement);
+  
+          const taskInputEl = document.createElement('input');
+          taskInputEl.classList.add('text');
+          taskInputEl.type = 'text';
+          taskInputEl.value = task.name;
+          taskInputEl.setAttribute('readonly', 'readonly');
+  
+          taskContentElement.appendChild(taskInputEl);
+  
+          const taskActionsElement = document.createElement('div');
+          taskActionsElement.classList.add('actions');
+  
+          const taskEditElement = document.createElement('button');
+          taskEditElement.classList.add('edit');
+          taskEditElement.innerText = 'Edit';
+  
+          const taskDeleteElement = document.createElement('button');
+          taskDeleteElement.classList.add('delete');
+          taskDeleteElement.innerText = 'Delete';
+  
+          taskActionsElement.appendChild(taskEditElement);
+          taskActionsElement.appendChild(taskDeleteElement);
+  
+          taskElement.appendChild(taskActionsElement);
+  
+          tasksContainer.appendChild(taskElement);
+  
+          taskEditElement.addEventListener('click', (e) => {
+            if (taskEditElement.innerText.toLowerCase() == 'edit') {
+              taskEditElement.innerText = 'Save';
+              taskInputEl.removeAttribute('readonly');
+              taskInputEl.focus();
+            } else {
+              taskEditElement.innerText = 'Edit';
+              taskInputEl.setAttribute('readonly', 'readonly');
+            }
+          });
+  
+          taskDeleteElement.addEventListener('click', () => {
+            tasksContainer.removeChild(taskElement);
+          });
+        });
+      })
+      .catch(err => console.error(err));
+  });
