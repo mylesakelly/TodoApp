@@ -7,6 +7,8 @@ Project Description: The purpose of this project is to create a Task Tracker App
 
 Github Link: https://github.com/mylesakelly/TodoApp.git
 
+AWS deployed link: https://main.d39cg79fyh6rpg.amplifyapp.com/todoproject/frontend/index
+
 Installation: First, the package.json was installed by using the command npm init -y. For the backend portion of this project, Node.js was used. I installed Node.js by using the command npm i node in my terminal. I also installed express.js by using the command npm i express in my terminal. 
 
 
