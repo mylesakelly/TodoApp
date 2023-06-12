@@ -1,96 +1,90 @@
+// event listener created to trigger when the window has loaded all html css and javascript
 window.addEventListener('load', () => {
+    // created variables for the elements located on the html page
     const form = document.querySelector("#new-task-form");
     const input = document.querySelector("#new-task-input");
-    const list_el = document.querySelector("#tasks");
-    
+    const listEl = document.querySelector("#tasks");
+//   event listener created for the form variable which is the text input 
     form.addEventListener('submit', (e) => {
-        e.preventDefault();
+      e.preventDefault();
+  
+      const task = input.value;
+      //  if the user tries to click the "add task" button without adding any characters to the text input field
+    // they will be alered to fill out the task
+      if (!task) {
+        alert('Please fill out the task');
+        return;
+      }
 
-        const task = input.value;
+//   taskEl div element is created and styling from css is added to it
+      const taskEl = document.createElement("div");
+      taskEl.classList.add("task");
+  
+// taskContentEl div element is created and styling from css is added to it
+      const taskContentEl = document.createElement("div");
+      taskContentEl.classList.add("content");
 
-        if(!task) {
-            alert('Please fill out the task');
-            return;
+// taskContentEl is added as a child element under taskEl
+      taskEl.appendChild(taskContentEl);
+  
+// taskInputEl element is created and styling is added as well
+// the input type is set to text and the value is set to task   
+      const taskInputEl = document.createElement("input");
+      taskInputEl.classList.add("text");
+      taskInputEl.type = "text";
+      taskInputEl.value = task;
+      taskInputEl.setAttribute("readonly", "readonly");
+
+// taskInputEl is added as a child element under TaskContentEl
+      taskContentEl.appendChild(taskInputEl);
+
+    //   created element for actions buttons
+      const taskActionsEl = document.createElement('div');
+      taskActionsEl.classList.add('actions');
+  
+// created element for edit button
+      const taskEditEl = document.createElement('button');
+      taskEditEl.classList.add('edit');
+      taskEditEl.innerText = 'Edit';
+  
+// element created for delete button
+      const taskDeleteEl = document.createElement('button');
+      taskDeleteEl.classList.add('delete');
+      taskDeleteEl.innerText = 'Delete';
+  
+// edit and delete button are added as child elements under TaskActionsEl
+      taskActionsEl.appendChild(taskEditEl);
+      taskActionsEl.appendChild(taskDeleteEl);
+  
+      taskEl.appendChild(taskActionsEl);
+  
+      listEl.appendChild(taskEl);
+// input value for the text field is set to an empty string so user can write whatever they want
+      input.value = '';
+  
+// click event listeners for the save and edit buttons 
+      taskEditEl.addEventListener('click', (e) => {
+        if (taskEditEl.innerText.toLowerCase() === "edit") {
+          taskEditEl.innerText = "Save";
+          taskInputEl.removeAttribute("readonly");
+          taskInputEl.focus();
+        } else {
+          taskEditEl.innerText = "Edit";
+          taskInputEl.setAttribute("readonly", "readonly");
         }
-
-        const task_el = document.createElement("div");
-        task_el.classList.add("task");
-
-        const task_content_el = document.createElement("div");
-        task_content_el.classList.add("content");
-
-        task_el.appendChild(task_content_el);
-
-        const task_input_el = document.createElement("input");
-        task_input_el.classList.add("text");
-        task_input_el.type = "text";
-        task_input_el.value = task;
-        task_input_el.setAttribute("readonly", "readonly");
-
-        task_content_el.appendChild(task_input_el);
-
-		const task_actions_el = document.createElement('div');
-		task_actions_el.classList.add('actions');
-		
-		const task_edit_el = document.createElement('button');
-		task_edit_el.classList.add('edit');
-		task_edit_el.innerText = 'Edit';
-
-		const task_delete_el = document.createElement('button');
-		task_delete_el.classList.add('delete');
-		task_delete_el.innerText = 'Delete';
-
-		task_actions_el.appendChild(task_edit_el);
-		task_actions_el.appendChild(task_delete_el);
-
-		task_el.appendChild(task_actions_el);
-
-		list_el.appendChild(task_el);
-
-		input.value = '';
-
-        task_edit_el.addEventListener('click', (e) => {
-			if (task_edit_el.innerText.toLowerCase() == "edit") {
-				task_edit_el.innerText = "Save";
-				task_input_el.removeAttribute("readonly");
-				task_input_el.focus();
-			} else {
-				task_edit_el.innerText = "Edit";
-				task_input_el.setAttribute("readonly", "readonly");
-			}
-        });
-
-        task_delete_el.addEventListener('click', () => {
-            list_el.removeChild(task_el);
-        });
-    });        
-});
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     // Fetch JSON data from the server
-//     fetch('../server/src/api/data.json')
-//         .then(response => response.json())
-//         .then(jsonData => {
-//             // Get the tasks container
-//             const tasksContainer = document.getElementById('tasks');
-
-//             // Loop through the JSON data and create HTML elements
-//             jsonData.forEach(task => {
-//                 // Create a task element
-//                 const taskElement = document.createElement('div');
-//                 taskElement.textContent = task.name;
-
-//                 // Append the task element to the tasks container
-//                 tasksContainer.appendChild(taskElement);
-//             });
-//         })
-//         .catch(err => console.error(err));
-// });
-
-
-document.addEventListener('DOMContentLoaded', () => {
+      });
+//   click event listeners for the delete button
+      taskDeleteEl.addEventListener('click', () => {
+        listEl.removeChild(taskEl);
+        deleteTaskFromJson(task);
+      });
+    });
+  });
+  
+// event listener for when the web page is loaded trigger for the json data to be fetched from the server and displayed on the page
+  document.addEventListener('DOMContentLoaded', () => {
     // Fetch JSON data from the server
-    fetch('../server/src/api/data.json') 
+    fetch('../server/src/data.json')
       .then(response => response.json())
       .then(jsonData => {
         // Get the tasks container
@@ -98,56 +92,84 @@ document.addEventListener('DOMContentLoaded', () => {
   
         // Loop through the JSON data and create HTML elements
         jsonData.items.forEach(task => {
-          // Create a task element
-          const taskElement = document.createElement('div');
-          taskElement.classList.add('task');
+          createTaskElement(task, tasksContainer);
+        });
+      })
+      
+    //   console.log errors if fail
+      .catch(err => console.error(err));
+  });
+
+//   attempting to use the PUT method to save any updates entered on the task app to the json file
+// code did not work
   
-          const taskContentElement = document.createElement('div');
-          taskContentElement.classList.add('content');
+  function createTaskElement(task, container) {
+    const taskElement = document.createElement('div');
+    taskElement.classList.add('task');
   
-          taskElement.appendChild(taskContentElement);
+    const taskContentElement = document.createElement('div');
+    taskContentElement.classList.add('content');
   
-          const taskInputEl = document.createElement('input');
-          taskInputEl.classList.add('text');
-          taskInputEl.type = 'text';
-          taskInputEl.value = task.name;
-          taskInputEl.setAttribute('readonly', 'readonly');
+    taskElement.appendChild(taskContentElement);
   
-          taskContentElement.appendChild(taskInputEl);
+    const taskInputEl = document.createElement('input');
+    taskInputEl.classList.add('text');
+    taskInputEl.type = 'text';
+    taskInputEl.value = task.name;
+    taskInputEl.setAttribute('readonly', 'readonly');
   
-          const taskActionsElement = document.createElement('div');
-          taskActionsElement.classList.add('actions');
+    taskContentElement.appendChild(taskInputEl);
   
-          const taskEditElement = document.createElement('button');
-          taskEditElement.classList.add('edit');
-          taskEditElement.innerText = 'Edit';
+    const taskActionsElement = document.createElement('div');
+    taskActionsElement.classList.add('actions');
   
-          const taskDeleteElement = document.createElement('button');
-          taskDeleteElement.classList.add('delete');
-          taskDeleteElement.innerText = 'Delete';
+    const taskEditElement = document.createElement('button');
+    taskEditElement.classList.add('edit');
+    taskEditElement.innerText = 'Edit';
   
-          taskActionsElement.appendChild(taskEditElement);
-          taskActionsElement.appendChild(taskDeleteElement);
+    const taskDeleteElement = document.createElement('button');
+    taskDeleteElement.classList.add('delete');
+    taskDeleteElement.innerText = 'Delete';
   
-          taskElement.appendChild(taskActionsElement);
+    taskActionsElement.appendChild(taskEditElement);
+    taskActionsElement.appendChild(taskDeleteElement);
   
-          tasksContainer.appendChild(taskElement);
+    taskElement.appendChild(taskActionsElement);
   
-          taskEditElement.addEventListener('click', (e) => {
-            if (taskEditElement.innerText.toLowerCase() == 'edit') {
-              taskEditElement.innerText = 'Save';
-              taskInputEl.removeAttribute('readonly');
-              taskInputEl.focus();
-            } else {
-              taskEditElement.innerText = 'Edit';
-              taskInputEl.setAttribute('readonly', 'readonly');
-            }
-          });
+    container.appendChild(taskElement);
   
-          taskDeleteElement.addEventListener('click', () => {
-            tasksContainer.removeChild(taskElement);
-          });
+    taskEditElement.addEventListener('click', (e) => {
+      if (taskEditElement.innerText.toLowerCase() === 'edit') {
+        taskEditElement.innerText = 'Save';
+        taskInputEl.removeAttribute('readonly');
+        taskInputEl.focus();
+      } else {
+        taskEditElement.innerText = 'Edit';
+        taskInputEl.setAttribute('readonly', 'readonly');
+      }
+    });
+  
+    taskDeleteElement.addEventListener('click', () => {
+      container.removeChild(taskElement);
+      deleteTaskFromJson(task);
+    });
+  }
+  
+  function deleteTaskFromJson(task) {
+    fetch('../server/src/data.json')
+      .then(response => response.json())
+      .then(jsonData => {
+        const updatedItems = jsonData.items.filter(item => item.name !== task.name);
+        const updatedData = { items: updatedItems };
+  
+        return fetch('../server/src/api/data.json', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedData)
         });
       })
       .catch(err => console.error(err));
-  });
+  }
+  
